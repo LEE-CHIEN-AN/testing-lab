@@ -5,21 +5,22 @@ import { FastifyInstance } from 'fastify'
 import { Todo, TodoBody } from '../src/types/todo'
 
 describe('Todo API Testing', () => {
-  let server: FastifyInstance
+  let server: FastifyInstance // 這是測試伺服器 FastifyInstance是Fastify的實例
 
-  beforeAll(async () => {
-    server = serverOf()
-    await server.ready()
+  beforeAll(async () => { // 在所有測試之前執行
+    server = serverOf() //serverOf是server的工廠函數，用於創建測試伺服器
+    await server.ready() //等待伺服器準備好
   })
 
-  afterAll(async () => {
-    await server.close()
+  afterAll(async () => { //在所有測試之後執行
+    await server.close() //關閉伺服器
   })
 
-  afterEach(() => {
-    vi.resetAllMocks()
+  afterEach(() => { //在每次測試之後執行
+    vi.resetAllMocks() //重置所有mock
   })
 
+  // 當收到GET /api/v1/todos請求時，應該返回一個包含所有todos的數組
   test('When receive a GET /api/v1/todos request, Then it should response an array of todos', async () => {
     // arrange: mock the repo function to return an array of todos
     const todos: Array<Todo> = [
@@ -50,18 +51,19 @@ describe('Todo API Testing', () => {
     expect(result).toStrictEqual(todos)
   })
 
+  // 當收到GET /api/v1/todos請求時，如果repo函數返回一個空數組，則應該返回一個空數組
   test('Given an empty array return from repo function, When receive a GET /api/v1/todos request, Then it should response an empty array', async () => {
     // arrange: mock the repo function to return an empty array
-    vi.spyOn(TodoRepo, 'findAllTodos').mockImplementation(async () => [])
+    vi.spyOn(TodoRepo, 'findAllTodos').mockImplementation(async () => []) //mockImplementation是vitest提供的一個方法，用於模擬函數的實現，這裡我們模擬findAllTodos函數返回一個空數組
 
     // act: receive a GET /api/v1/todos request
-    const response = await server.inject({
+    const response = await server.inject({ // inject是Fastify提供的一個方法，用於模擬HTTP請求
       method: 'GET',
       url: '/api/v1/todos'
     })
 
     // assert: response should be an empty array
-    const todos = JSON.parse(response.body)['todos']
+    const todos = JSON.parse(response.body)['todos'] 
     expect(todos).toStrictEqual([])
   })
 
